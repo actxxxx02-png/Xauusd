@@ -1,41 +1,31 @@
 # XAUUSD Live Capture
 
-A lightweight, mobile-first market-data capture app for XAU/USD. Its purpose is to replace chart screenshots with a structured, timestamped snapshot you can paste into ChatGPT.
+A lightweight mobile-first app that replaces chart screenshots with structured XAU/USD data for ChatGPT analysis.
 
-## What it does
+## Included
+- Mobile-friendly React/Vite interface.
+- Bid, ask, spread, source and quote timestamp display.
+- M1, M5 and M15 OHLC capture schema.
+- One-tap capture, text export, JSON copy, download and native share.
+- Quote freshness and candle integrity validation.
+- Fail-closed serverless API endpoint and GitHub Actions build workflow.
 
-- Shows the active feed status and latest quote (bid, ask, spread, source, timestamp).
-- Captures M1, M5 and M15 OHLC candle data with timestamps and closed/in-progress state.
-- One-tap capture, copy as readable text, copy JSON, and share/export.
-- Rejects stale, missing or malformed data. No simulated prices are ever presented as live.
-- Does not place trades, request broker passwords, or calculate signals.
+## Exness match is mandatory
+This project does not silently use generic XAU/USD prices. The included API returns HTTP 503 until an authorized live source has been validated against the exact Exness MT5 XAUUSD symbol. Validation must cover synchronized bid/ask, spread, precision, timestamps and M1/M5/M15 candle boundaries.
 
-## Important: Exness feed matching
+Never store broker passwords. Keep provider credentials server-side only.
 
-The app deliberately ships with the Exness feed adapter **unconfigured**. A generic XAU/USD provider is not an acceptable silent fallback: gold CFD quotes can differ by broker, and a feed cannot be called Exness-matched until it has been validated against the user's Exness MT5 symbol and candle history.
-
-To connect an approved Exness-matching feed, implement the backend contract in `src/lib/feed.ts` and configure the server endpoint. Do not put provider secrets in browser code. Do not ask users for Exness account passwords. If an officially supported read-only API or authenticated quote bridge is not available, the app must report that live Exness-matched data is unavailable.
-
-## Run locally
-
-Requires Node.js 20+.
+## Run
+Requires Node.js 20+:
 
 ```bash
 npm install
 npm run dev
-``
+npm run build
+```
 
-Open the local URL in a phone browser. To build: `npm run build`.
+## Deploy
+Import this GitHub repository in Vercel, use the repository root and deploy. Until the feed is configured, the app shows Feed Offline and will not provide fabricated market data.
 
-## Feed contract
-
-The client reads `GET /api/market/snapshot`. The response schema is in `src/lib/schema.ts`. All timestamps are ISO-8601 UTC. Candle arrays are chronological (oldest first), and each timeframe includes enough history for context (default 30 bars). The server must set `source.matchStatus` to `verified` only after comparison against Exness MT5 for the same symbol, session and timestamps.
-
-## Configuration
-
-- `VITE_REFRESH_MS`: polling interval (default 2000 ms; this only refreshes a configured feed, it does not make a delayed provider live).
-- Backend/provider secrets belong in server-side environment variables only.
-
-## Current implementation status
-
-The UI, typed snapshot contract, validation, capture/export, and an explicit unconfigured feed state are implemented. A verified Exness-matching live provider is not bundled because no authorized feed credentials or confirmed integration have been supplied. The app will not invent one or pretend a public generic feed matches Exness.
+## Remaining dependency
+A verified Exness-matching live feed is not configured. A generic public quote API is not an acceptable substitute. The adapter can only be completed once a supported authorized Exness feed path is available.
