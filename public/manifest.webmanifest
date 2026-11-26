@@ -1,0 +1,9 @@
+{
+  "name": "XAUUSD Live Capture",
+  "short_name": "XAUUSD",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d12",
+  "theme_color": "#090d12",
+  "description": "One-tap XAU/USD M1 M5 M15 market data capture"
+}
