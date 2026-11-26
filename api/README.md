@@ -1,9 +1,16 @@
-# Backend contract
+# Market data API
 
-Implement a server-side `GET /api/market/snapshot` endpoint. Keep provider credentials on the server. Never ship them in Vite variables or browser bundles.
+`GET /api/market/snapshot` is the browser contract. The included serverless route returns HTTP 503 until a verified, authorized Exness-matching adapter is configured.
 
-Return HTTP 503 until a live, authorized Exness-matching feed is configured. Do not fall back to another broker or a delayed quote.
+## Non-negotiable feed rules
+- Do not substitute generic XAU/USD CFD quotes for Exness.
+- Do not present delayed quotes as live.
+- Do not set `matchStatus: verified` until synchronized comparison to the user's Exness MT5 XAUUSD symbol validates bid, ask, spread, precision, timestamps and M1/M5/M15 candle boundaries over representative market sessions.
+- Keep provider credentials server-side. Never ask for or store Exness trading passwords.
+- Use UTC ISO-8601 timestamps, chronological candles, explicit closed flags and at least 30 bars per timeframe.
 
-Successful response: see `src/lib/schema.ts`. `source.matchStatus` must remain `unverified` until the data has been compared to Exness MT5 for the exact XAUUSD symbol at synchronized timestamps over representative market sessions. Check bid/ask, spread, price precision, OHLC alignment, session gaps, and timezones. Only then set it to `verified`.
+## Deploy
+Import this repository into Vercel, keep the root directory selected, and deploy. The UI and endpoint are included. Until a verified feed is connected, the app correctly reports Feed Offline.
 
-The client refuses to display data unless the quote is newer than five seconds and matchStatus is verified. Candle data should contain at least 30 chronological bars for each timeframe, with correct UTC timestamps and a closed flag. No fabricated, extrapolated, or interpolated candles.
+## Why HTTP 503
+No authorized Exness feed integration or credentials were provided. The app deliberately fails closed rather than inventing prices.
